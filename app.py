@@ -4,7 +4,7 @@ import sqlite3
 """
          создания таблицы
     sqlite> CREATE TABLE posts
-    (id int primary key, title varchar(200), 
+    (id integer primary key autoincrement, title varchar(200), 
     description varchar(200), date text(100));
     """
 
@@ -26,43 +26,45 @@ def add():
     #127.0.0.1:5000/add?id=3&title=newone&desc=Uaaauu&date=old
 
     conn = sqlite3.connect('posts')
-    
-    
-    post_id = request.args.get('id')
+    cursor = conn.cursor()
+
+    # post_id = request.args.get('id')
     post_title = request.args.get('title')
     post_description = request.args.get('desc')
-    post_date = request.args.get('date')
     
-    values = (post_id, post_title, post_description, post_date)
-    print(values)
-    print(values)
-    print('1231231321')
-    cursor = conn.cursor()
+    values =(post_title, post_description)
+    cursor.execute("INSERT INTO posts(title, description, date) Values ('{}','{}', datetime('now'));".format(*values))
+    conn.commit()
     
-    cursor.execute("INSERT INTO posts Values ({},'{}','{}','{}');".format(*values))
-    # conn.commit()
-    cursor.execute("SELECT * FROM posts")
-    list_all = cursor.fetchall()
     conn.close()
-    return render_template('index.html', list_all=list_all)
+    return redirect('/')
 
 @app.route('/edit')
 def edit():
     conn = sqlite3.connect('posts')
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM posts")
-    list_all = cursor.fetchall()
+    
+    post_id = request.args.get('id')
+    post_title = request.args.get('title')
+    post_description = request.args.get('desc')
+    values = (post_title, post_description, post_id)
+    
+    cursor.execute("UPDATE posts SET title = '{}',description = '{}' WHERE id = {};".format(*values))
+    conn.commit()
     conn.close()
-    return redirect('index.html', list_all=list_all)
+    return redirect('/')
 
 @app.route('/remove')
 def remove():
+    post_id = int(request.args.get('id'))
+    
     conn = sqlite3.connect('posts')
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM posts")
-    list_all = cursor.fetchall()
+    cursor.execute("Delete from posts where id = (?);", (post_id, ))
+    conn.commit()
+
     conn.close()
-    return redirect('index.html', list_all=list_all)
+    return redirect('/')
 
 
 if __name__ == '__main__':     
