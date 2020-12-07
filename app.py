@@ -44,7 +44,8 @@ def add():
     post_description = request.args.get('desc')
     
     values = (post_title, post_description)
-    cursor.execute("INSERT INTO posts(title, description, date) Values ('{}','{}', datetime('now'));".format(*values))
+
+    cursor.execute("INSERT INTO posts(title, description, date) Values ((?),(?), datetime('now'));", (*values, ))
     conn.commit()
     
     conn.close()
@@ -67,7 +68,7 @@ def edit():
     post_description = request.args.get('desc')
     values = (post_title, post_description, post_id)
     
-    cursor.execute("UPDATE posts SET title = '{}',description = '{}' WHERE id = {};".format(*values))
+    cursor.execute("UPDATE posts SET title = (?),description = (?) WHERE id = (?);", (*values, ))
     conn.commit()
     conn.close()
     return redirect('/')
